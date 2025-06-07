@@ -5,7 +5,7 @@
 #include <iostream>  // For debugging output if needed
 
 // Helper function to print vectors for debugging
-void printVector(const std::vector<int>& vec, const std::string& label = "") {
+static void printVector(const std::vector<int>& vec, const std::string& label = "") {
     if (!label.empty()) {
         std::cout << label << ": ";
     }

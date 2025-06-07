@@ -14,6 +14,7 @@ enable_testing()
 # Add subdirectories
 add_subdirectory(src)
 add_subdirectory(tests)
+add_subdirectory(benchmarks)
 
 find_package(OpenMP)
 if(OpenMP_CXX_FOUND)

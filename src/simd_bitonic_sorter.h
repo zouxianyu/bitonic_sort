@@ -18,14 +18,14 @@ public:
     void sort(std::vector<int>& arr, SortOrder order) override;
     std::string getName() const override;
 
+    // Threshold for switching to sequential sort for small subproblems
+    // or for parts not large enough for effective SIMD.
+    static const int SEQUENTIAL_THRESHOLD_SIMD = 64; // Must be at least 2*SIMD_WIDTH for some operations
+
 private:
     // SSE processes 4 integers at a time (128 bits / 32 bits per int)
     static const int SIMD_WIDTH = 4;
     // AVX2 would be 8, AVX512 would be 16
-
-    // Threshold for switching to sequential sort for small subproblems
-    // or for parts not large enough for effective SIMD.
-    static const int SEQUENTIAL_THRESHOLD_SIMD = 64; // Must be at least 2*SIMD_WIDTH for some operations
 
     void bitonicSortRecursiveSIMD(std::vector<int>& arr, int low, int count, SortOrder order);
     void bitonicMergeSIMD(std::vector<int>& arr, int low, int count, SortOrder order);
