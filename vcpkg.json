@@ -1,0 +1,8 @@
+{
+  "name": "bitonic-sort",
+  "version-string": "0.1.0",
+  "dependencies": [
+    "gtest",
+    "benchmark"
+  ]
+}

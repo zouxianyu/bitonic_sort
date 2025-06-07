@@ -1,0 +1,59 @@
+# CMake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+compile_commands.json
+Makefile
+
+# vcpkg
+vcpkg/
+vcpkg_installed/
+
+# Build directory
+build/
+_build/
+**/build/
+**/*_build/
+
+# Output
+*.out
+*.exe
+*.dll
+*.so
+*.dylib
+
+# IDE specific
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sdf
+*.opensdf
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+
+# Docs
+doc/*.csv
+doc/*.png
+
+# Other
+*.DS_Store
