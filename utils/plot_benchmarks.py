@@ -128,6 +128,83 @@ def plot_performance(df):
     else:
         print("StdThread sorter not found in data, skipping scalability plot.")
 
+def plot_fixed_size_comparison(df, target_size):
+    """
+    Plots a bar chart comparing CPU times of different sorting algorithms for a fixed input size.
+    For StdThread, it finds the best performing thread count.
+    """
+    sns.set_style("whitegrid") # Ensure style is set
+    plt.rcParams['figure.dpi'] = 300
+
+    # Ensure FIGURES_DIR exists (though plot_performance might have created it)
+    if not os.path.exists(FIGURES_DIR):
+        os.makedirs(FIGURES_DIR)
+        print(f"Created directory: {FIGURES_DIR}")
+
+    # Filter DataFrame for the target size
+    df_filtered_size = df[df['data_size'] == target_size].copy()
+
+    if df_filtered_size.empty:
+        print(f"No data found for target size N={target_size}. Skipping plot.")
+        return
+
+    plot_data = []
+    sorter_types = df_filtered_size['sorter_type'].unique()
+
+    for sorter in sorter_types:
+        subset = df_filtered_size[df_filtered_size['sorter_type'] == sorter]
+        if subset.empty:
+            continue
+
+        if sorter == 'StdThread':
+            if 'threads' in subset.columns and subset['threads'].notna().any():
+                # Find the row with the minimum cpu_time for this sorter and target_size
+                best_run = subset.loc[subset['cpu_time'].idxmin()]
+                # Use a descriptive name including the best thread count
+                # Ensure thread_count is an int for formatting if not NaN
+                thread_count = best_run['threads']
+                label = f"StdThread ({int(thread_count)} thr)" if pd.notna(thread_count) else "StdThread (best)"
+                plot_data.append({'sorter_type': label, 'cpu_time': best_run['cpu_time']})
+            else: # Fallback if threads column is not informative
+                plot_data.append({'sorter_type': 'StdThread (best)', 'cpu_time': subset['cpu_time'].min()})
+        else:
+            # For other sorters, there's usually one entry per size (or they don't vary by threads in the same way)
+            # If multiple entries, take the first one or average/min if appropriate. Assuming one for now.
+            plot_data.append({'sorter_type': sorter, 'cpu_time': subset['cpu_time'].iloc[0]})
+
+    if not plot_data:
+        print(f"No data to plot for N={target_size} after processing. Skipping plot.")
+        return
+
+    plot_df = pd.DataFrame(plot_data)
+    plot_df.sort_values('cpu_time', inplace=True) # Optional: sort by time
+
+    plt.figure(figsize=(10, 6))
+    # Using seaborn.barplot for potentially nicer aesthetics and easier handling of categorical data
+    barplot = sns.barplot(x='sorter_type', y='cpu_time', data=plot_df, palette="viridis")
+
+    plt.title(f'Algorithm Performance Comparison at N={target_size}', fontsize=16)
+    plt.xlabel('Sorter Algorithm', fontsize=14)
+    plt.ylabel('CPU Time (nanoseconds)', fontsize=14)
+
+    # Add text labels on bars
+    for p in barplot.patches:
+        barplot.annotate(format(p.get_height(), '.0f'), # Format as integer
+                       (p.get_x() + p.get_width() / 2., p.get_height()),
+                       ha = 'center', va = 'center',
+                       xytext = (0, 9),
+                       textcoords = 'offset points',
+                       fontsize=10)
+
+    plt.xticks(rotation=45, ha="right") # Rotate labels if they overlap
+    plt.tight_layout()
+
+    plot_filename = f'performance_comparison_N{target_size}.png'
+    plot_path = os.path.join(FIGURES_DIR, plot_filename)
+    plt.savefig(plot_path)
+    plt.close()
+    print(f"Saved fixed size comparison plot to {plot_path}")
+
 
 def main():
     # Find the actual header row
@@ -195,6 +272,10 @@ def main():
         return
 
     plot_performance(df)
+
+    # Add calls to the new plotting function for specific sizes
+    plot_fixed_size_comparison(df, 64)
+    plot_fixed_size_comparison(df, 65536)
 
 if __name__ == '__main__':
     main()

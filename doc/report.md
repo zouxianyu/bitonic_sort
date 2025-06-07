@@ -131,7 +131,24 @@ This plot shows how the CPU time for sorting a large array (e.g., N=65536) with 
 *   **Initial Gains**: Performance typically improves (CPU time decreases) as the number of threads increases from 1 up to the number of physical cores available on the system.
 *   **Diminishing Returns**: Beyond the number of physical cores, the benefits may diminish or even reverse due to hyper-threading limitations, increased synchronization overhead, and contention for resources. The plot shows the trend, indicating an optimal thread count around the system's hardware concurrency.
 
-### 5.3. Discussion
+### 5.3. Fixed-Size Performance Deep Dive
+These plots provide a direct comparison of algorithm performance at specific small (N=64) and large (N=65536) data sizes, offering insights into overheads and efficiencies at these scales.
+
+![Performance Comparison at N=64](figures/performance_comparison_N64.png)
+**Figure 3: Algorithm Performance Comparison at N=64**
+
+At N=64, the dataset is very small.
+*   **Relative Performance**: We observe the relative CPU times of the Plain, OpenMP, SIMD, and the best-performing StdThread variants.
+*   **Overhead vs. Benefit**: For such a small N, the overhead associated with setting up parallel execution (OpenMP, StdThread) might negate any benefits, potentially making them slower than or comparable to the Plain sequential version. The SIMD version might show some benefit due to its low-level data parallelism, but even here, the small data volume might mean that data loading/unloading and fixed overheads consume a significant portion of the execution time. The best StdThread variant will likely be one using very few threads, possibly even just one, effectively behaving like the plain sorter.
+
+![Performance Comparison at N=65536](figures/performance_comparison_N65536.png)
+**Figure 4: Algorithm Performance Comparison at N=65536**
+
+At N=65536, the dataset is significantly larger, allowing parallel algorithms to demonstrate their strengths.
+*   **Relative Performance**: The parallel versions (OpenMP, StdThread with optimal threads) and the SIMD version are expected to substantially outperform the Plain sorter.
+*   **Efficiency at Scale**: Differences between OpenMP, the best StdThread configuration, and SIMD will be more indicative of their true parallel efficiencies. SIMD should maintain its constant-factor speedup. The threaded versions should show significant gains, with their relative performance perhaps depending on the efficiency of thread management and synchronization within the specific implementation and the underlying hardware's core count.
+
+### 5.4. Discussion
 The results align with theoretical expectations.
 *   The SIMD implementation benefits from instruction-level parallelism, effectively reducing the constant factors in execution time for the comparison and swap phases.
 *   Thread-based parallelism (OpenMP and `std::thread`) exploits multi-core architectures. OpenMP, being a higher-level library, often achieves good performance with less manual thread management code compared to raw `std::thread` if not using advanced pooling with `std::thread`.
